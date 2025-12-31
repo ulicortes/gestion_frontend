@@ -1,40 +1,57 @@
-<div class="w-screen h-screen bg-black/10 pt-8 flex flex-col justify-start items-center">
-    <div class="w-full h-2/6 overflow-y-scroll">
+<div class="w-screen h-screen bg-black/20 pt-8 flex flex-col justify-start items-center">
+    <div class="w-fit h-1/3 overflow-y-scroll">
         <table class="w-full overflow-y-scroll content-start">
-            <thead class="h-12 bg-slate-400 text-center items-start">
-                <th class="w-fit border-1 border-black">Id</th>
-                <th class="w-fit border-1 border-black">Nombre</th>
-                <th class="w-fit border-1 border-black">Cantidad</th>
-                <th class="w-fit border-1 border-black">Precio</th>
-                <th class="w-fit border-1 border-black"></th>
+            <thead class="h-6 bg-slate-400 text-center items-start fixed z-30">
+                <th class="w-12">Id</th>
+                <th class="w-64">Nombre</th>
+                <th class="w-32">Stock</th>
+                <th class="w-32">Precio</th>
+                <th class="w-32"></th>
             </thead>
-            <tbody class="h-fit text-center items-start">
-                <tr>
-                    <td>1</td>
-                    <td>Elemento</td>
-                    <td>100</td>
-                    <td>3100</td>
-                    <td class="flex justify-center items-center">
-                        <button class="self-center cursor-pointer hover:underline">Agregar</button>
+            <tbody class="h-fit text-center items-start relative top-6">
+                @for (a of articulos; track a.getId()) {
+                <tr class="h-10 bg-slate-200">
+                    <td class="w-12">{{a.getId()}}</td>
+                    <td class="w-fit">{{a.getNombre()}}</td>
+                    <td class="w-32">{{a.getCantidad()}}</td>
+                    <td class="w-32">${{a.getVenta()}}</td>
+                    <td class="flex justify-center items-center w-32 h-10">
+                        <button (click)="agregar(a)" class="self-center cursor-pointer hover:underline">Agregar</button>
                     </td>
                 </tr>
+                }
             </tbody>
         </table>
     </div>
-    <div class="w-full h-4/6 overflow-y-scroll">
-        <table class="w-full bg-slate-300 border-2 border-black">
+    <div class="w-full h-2/3 overflow-y-scroll">
+        <table class="w-full bg-slate-400 border-2 border-black">
             <thead>
-                <th colspan="5" class="text-xl">Salida</th>
+                <th colspan="6" class="text-2xl">Salida</th>
+            </thead>
+            <thead>
+                <th class="text-lg">Id</th>
+                <th class="text-lg">Articulo</th>
+                <th class="text-lg">Cantidad</th>
+                <th class="text-lg">Precio unit.</th>
+                <th class="text-lg">Total</th>
             </thead>
             <tbody class="text-center items-center">
-                <tr class="h-10">
-                    <td class="w-48">1</td>
-                    <td class="w-48">Elemento</td>
-                    <td class="w-48">100</td>
-                    <td class="w-48">3100</td>
-                    <td>
-                        <button class="cursor-pointer hover:underline">Borrar</button>
+                @for (item of salida; track item.getId()) {
+                <tr class="h-10 bg-slate-200">
+                    <td class="w-12">{{item.getId()}}</td>
+                    <td class="w-96">{{item.getNombre()}}</td>
+                    <td class="w-12"><input [ngModel]="item.getCantidad()" (ngModelChange)="newValue($event, item)"
+                            type="number" name="" id="" class="w-full text-center" min="1" max="{{item.getStock()}}">
                     </td>
+                    <td class="w-24">${{item.getVenta()}}</td>
+                    <td class="w-24">${{(item.getVenta() * item.getCantidad()).toFixed(2)}}</td>
+                    <td class="w-16">
+                        <button (click)="borrar(item)" class="cursor-pointer hover:underline w-fit">Borrar</button>
+                    </td>
+                </tr>
+                }
+                <tr>
+                    <td class="font-bold texl-xl" colspan="6">TOTAL: ${{total}}</td>
                 </tr>
             </tbody>
         </table>
