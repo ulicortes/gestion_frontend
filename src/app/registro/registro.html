@@ -10,7 +10,7 @@
             </thead>
             <tbody class="h-fit text-center items-start relative top-6">
                 @for (a of articulos; track a.getId()) {
-                <tr class="h-10 bg-slate-200">
+                <tr class="h-10 even:bg-gray-200 odd:bg-white">
                     <td class="w-12">{{a.getId()}}</td>
                     <td class="w-fit">{{a.getNombre()}}</td>
                     <td class="w-32">{{a.getCantidad()}}</td>
