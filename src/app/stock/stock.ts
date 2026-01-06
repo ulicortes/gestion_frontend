@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
-import Articulo from '../clases/articulo';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ArticulosService } from '../compartidos/articulosService';
-import { CurrencyPipe } from '@angular/common';
+import { CurrencyPipe} from '@angular/common';
+import Articulo from '../clases/articulo';
 
 @Component({
   selector: 'app-stock',
@@ -11,11 +11,19 @@ import { CurrencyPipe } from '@angular/common';
   standalone: true,
 })
 export class Stock implements OnInit {
-  articulos: Articulo[];
-  constructor(private arts: ArticulosService) {
-    this.articulos = arts.getArticulos();
+  articulos: Articulo[] = [];
+  constructor(private arts: ArticulosService, private cdr: ChangeDetectorRef) {
+    
   }
   ngOnInit(): void {
-    this.articulos = this.arts.getArticulos();
+    this.arts.getArticulos().subscribe(
+      res => {
+        this.articulos = res;
+        this.cdr.markForCheck();
+        this.cdr.detectChanges();
+        console.log('1. Respuesta del servidor:', res);
+        console.log('2. Variable de la clase:', this.articulos);
+      }
+    );
   }
 }

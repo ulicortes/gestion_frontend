@@ -1,38 +1,39 @@
 <div class="w-screen h-screen bg-black/20 flex justify-center items-center">
-    <form action="" class="w-2/4 h-2/4 bg-white flex flex-row justify-center">
+    <form [formGroup]="form" class="w-2/4 h-2/4 bg-white flex flex-row justify-center">
         <div class="w-1/2 h-full flex flex-col justify-evenly">
             <div class="w-3/4 flex flex-col justify-center text-center self-center">
-                <input type="number" min="0" class="border-b-2 border-black">
+                <input type="number" formControlName="id" min="0" class="border-b-2 border-black text-center">
                 <label for="">Id</label>
             </div>
             <div class="w-3/4 flex flex-col justify-center text-center self-center">
-                <input type="text" class="border-b-2 border-black">
+                <input type="text" formControlName="nombre" class="border-b-2 border-black text-center">
                 <label for="">Nombre</label>
             </div>
             <div class="w-3/4 flex flex-col justify-center text-center self-center">
-                <input type="text" class="border-b-2 border-black">
+                <input type="text" formControlName="marca" class="border-b-2 border-black text-center">
                 <label for="">Marca</label>
             </div>
             <div class="w-3/4 flex flex-col justify-center text-center self-center">
-                <input type="number" min="0" class="border-b-2 border-black">
+                <input type="number" formControlName="cantidad" min="0" class="border-b-2 border-black text-center">
                 <label for="">Cantidad</label>
             </div>
         </div>
         <div class="w-1/2 h-full flex flex-col justify-evenly">
             <div class="w-3/4 flex flex-col justify-center text-center self-center">
-                <input type="number" min="0" class="border-b-2 border-black">
+                <input type="number" formControlName="compra" min="0" class="border-b-2 border-black text-center">
                 <label for="">Compra</label>
             </div>
             <div class="w-3/4 flex flex-col justify-center text-center self-center">
-                <input type="number" min="0" class="border-b-2 border-black">
+                <input type="number" formControlName="venta" min="0" class="border-b-2 border-black text-center">
                 <label for="">Venta</label>
             </div>
             <div class="w-3/4 flex flex-col justify-center text-center self-center">
-                <input type="text" class="border-b-2 border-black">
+                <input type="text" formControlName="proveedor" class="border-b-2 border-black text-center">
                 <label for="">Proveedor</label>
             </div>
             <div class="w-4/4 flex flex-col justify-center text-center items-center">
-                <input type="submit" value="Crear" class="bg-black text-white cursor-pointer px-10">
+                <button (click)="enviar()" class="bg-black text-white cursor-pointer px-10">Enviar</button>
+                <!-- <input type="submit" value="Crear" class="bg-black text-white cursor-pointer px-10"> -->
             </div>
         </div>
     </form>
