@@ -1,0 +1,44 @@
+name: "Publish Release"
+
+on:
+  push:
+    branches:
+      - main # O el nombre de tu rama principal
+
+jobs:
+  publish-tauri:
+    permissions:
+      contents: write
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: install dependencies (ubuntu only)
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev libayatana-appindicator3-dev librsvg2-dev
+
+      - name: install frontend dependencies
+        run: npm install # O yarn install / pnpm install
+
+      - name: build frontend
+        run: npm run build # Asegúrate de que este comando genere los archivos en /dist
+
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: app-v__VERSION__ # Tauri reemplazará esto con la versión en tauri.conf.json
+          releaseName: "App v__VERSION__"
+          releaseBody: "Versión automatizada de mi aplicación Tauri + Angular."
+          releaseDraft: true
+          prerelease: false
