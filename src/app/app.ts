@@ -15,16 +15,16 @@ export class App {
 
   @HostListener('document:keyup', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) { 
-    if (event.key === 'F1') {
+    if (event.key === 'F6') {
       this.router.navigate(['/'])
     }
-    if (event.key === 'F2') {
+    if (event.key === 'F7') {
       this.router.navigate(['/registro'])
     }
-    if (event.key === 'F3') {
+    if (event.key === 'F8') {
       this.router.navigate(['/historial'])
     }
-    if (event.key === 'F4') {
+    if (event.key === 'F9') {
       this.router.navigate(['/articulo'])
     }
   }

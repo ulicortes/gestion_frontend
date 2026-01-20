@@ -118,7 +118,7 @@ export class Registro implements OnInit {
   @HostListener('document:keyup', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) { 
     console.log(event.key)
-    if (event.key === 'F5') {
+    if (event.key === 'F2') {
       this.toggleFiltro()
     }
   }
