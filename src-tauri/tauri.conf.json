@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "identifier": "com.invetnario.gestion",
   "build": {
-    "frontendDist": "../dist",
+    "frontendDist": "../dist/gestion_frontend/browser",
     "devUrl": "http://localhost:4200",
     "beforeDevCommand": "npm run start",
     "beforeBuildCommand": "npm run build"
