@@ -1,47 +1,77 @@
 import { Injectable } from '@angular/core';
-import Articulo from '../clases/articulo';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { from, Observable } from 'rxjs';
+import Database from '@tauri-apps/plugin-sql';
+import { invoke } from '@tauri-apps/api/core';
+import Item from '../clases/item';
+import ArticuloSalida from '../clases/articuloSalida';
+import Compra from '../clases/compra';
+import Detalle from '../clases/detalle';
 
 @Injectable({
   providedIn: 'root',
 })
+
 export class ArticulosService {
-  constructor(private http: HttpClient) { }
+  URL = "http://localhost:9871";
+  constructor(private http: HttpClient) {
+  }
 
-  getArticulos(): Observable<Articulo[]> {
-    return this.http.get<Articulo[]>('http://localhost:9871'); 
-    // [
-    //   new Articulo(1, "Interruptor Termomagnético 2x20A", "Schneider", 50, 12500.00, 19800.00, "ElectricData S.A.", "2023-10-15"),
-    //   new Articulo(2, "Cable THHN AWG #12 (Rollo 100m)", "Indeco", 20, 48500.00, 72500.00, "Cables del Sur", "2023-11-02"),
-    //   new Articulo(3, "Tomacorriente Doble con Tierra", "Leviton", 100, 5200.00, 8900.00, "Suministros Alpha", "2023-11-10"),
-    //   new Articulo(4, "Cinta Aislante (Negro)", "3M", 200, 5000.00, 8200.00, "Ferreteria Central", "2023-09-20"),
-    //   new Articulo(5, "Panel LED Circular 18W", "Philips", 40, 18500.00, 31500.00, "Ilumina S.A.C.", "2023-11-25"),
-    //   new Articulo(6, "Caja Rectangular Galvanizada", "Dexson", 300, 5000.00, 7800.00, "MetalMec", "2023-10-05"),
-    //   new Articulo(7, "Diferencial Residual 2x40A", "ABB", 15, 42500.00, 68500.00, "ElectricData S.A.", "2023-11-12"),
-    //   new Articulo(8, "Tubo Conduit PVC 3/4 (Tramo 3m)", "Pavco", 80, 5200.00, 9100.00, "Tubos & Perfiles", "2023-11-18"),
-    //   new Articulo(9, "Multímetro Digital", "Fluke", 5, 185000.00, 298000.00, "Herramientas Pro", "2023-08-30"),
-    //   new Articulo(10, "Lámpara de Emergencia LED", "Opalux", 25, 21500.00, 35800.00, "Suministros Alpha", "2023-12-01"),
-    //   new Articulo(11, "Pulsador Timbre Redondo", "BTicino", 60, 5100.00, 8800.00, "Cables del Sur", "2023-11-05"),
-    //   new Articulo(12, "Sensor de Movimiento 360°", "Sylvania", 12, 26500.00, 42500.00, "Ilumina S.A.C.", "2023-11-20"),
-    //   new Articulo(13, "Canaleta con Adhesivo 20x10mm", "Legrand", 150, 5300.00, 9200.00, "Ferreteria Central", "2023-10-28"),
-    //   new Articulo(14, "Bornera de Conexión 10mm", "Phoenix Contact", 500, 5000.00, 7800.00, "ElectricData S.A.", "2023-11-01"),
-    //   new Articulo(15, "Foco LED E27 9W (Luz Fría)", "Sylvania", 120, 5200.00, 8900.00, "Ilumina S.A.C.", "2023-12-05"),
-    //   new Articulo(16, "Interruptor Simple Empotrable", "BTicino", 90, 5200.00, 8500.00, "Suministros Alpha", "2023-12-08"),
-    //   new Articulo(17, "Enchufe Industrial 32A Trifásico", "Schneider", 10, 18000.00, 29500.00, "ElectricData S.A.", "2023-11-22"),
-    //   new Articulo(18, "Cable UTP Cat 6 (Rollo 305m)", "Panduit", 8, 45000.00, 72000.00, "Cables del Sur", "2023-10-30"),
-    //   new Articulo(19, "Contacto Simple con Tierra", "Leviton", 110, 5100.00, 8900.00, "Suministros Alpha", "2023-11-14"),
-    //   new Articulo(20, "Transformador 220V a 12V 60W", "Mean Well", 18, 12500.00, 21500.00, "ElectricData S.A.", "2023-11-27"),
-    //   new Articulo(21, "Reflector LED 50W Exterior", "Philips", 22, 16500.00, 29800.00, "Ilumina S.A.C.", "2023-12-03"),
-    //   new Articulo(22, "Ventilador Extractor 6 Pulgadas", "Soler & Palau", 14, 26000.00, 44500.00, "Ferreteria Central", "2023-10-18"),
-    //   new Articulo(23, "Temporizador Digital Programable", "Omron", 9, 38500.00, 62500.00, "ElectricData S.A.", "2023-11-09"),
-    //   new Articulo(24, "Caja de Distribución 12 Polos", "Schneider", 30, 9500.00, 16800.00, "MetalMec", "2023-11-16"),
-    //   new Articulo(25, "Balasto Electrónico 2x36W", "Osram", 26, 7200.00, 12500.00, "Ilumina S.A.C.", "2023-10-25")
+  getArticulos(): Observable<Item[]> {
+    // return this.http.get<Articulo[]>(this.URL);
+    return from(invoke<Item[]>('get_articles'));
+  }
 
-    // ];
+  newArticulo(a: Item): Observable<any> {
+    // return this.http.post<any>(this.URL, a, {
+    //   responseType: 'json'
+    // });
+    return from(invoke('new_article', {
+      codigo: a.codigo,
+      nombre: a.nombre,
+      marca: a.marca,
+      cantidad: a.cantidad,
+      compra: a.compra,
+      venta: a.venta,
+      proveedor: a.proveedor,
+      fecha: a.fecha
+    }));
+  }
+
+  deleteArticulo(id: number): Observable<any> {
+    //   return this.http.delete<any>(`${this.URL}/${id}`, {
+    //     responseType: 'json'
+    //   });
+    // }
+    return from(invoke('delete_article', { id: id }));
+  }
+
+  editArticulo(a: Item): Observable<any> {
+    return from(invoke('edit_article', {
+      id: a.id,
+      codigo: a.codigo,
+      nombre: a.nombre,
+      marca: a.marca,
+      cantidad: a.cantidad,
+      compra: a.compra,
+      venta: a.venta,
+      proveedor: a.proveedor,
+      fecha: a.fecha
+    }));
+  }
+
+  newExit(total:number, fecha: string, articulos: ArticuloSalida[]): Observable<any> {
+    return from(invoke('new_exit', {total: total, fecha: fecha, articulos: articulos}));
+  }
+
+  getVentas(): Observable<Compra[]> {
+    return from(invoke<Compra[]>('get_exits'));
+  }
+
+  getDetalle(id: number): Observable<Detalle[]> {
+    return from (invoke<Detalle[]>('get_detail_exit', {id: id}));
   }
 }
-
 
 /*
 Para crear un servicio en Angular que se comunique de manera eficiente con un backend, 

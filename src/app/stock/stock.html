@@ -2,7 +2,7 @@
     <div class="w-full h-full overflow-y-scroll">
         <table class="w-full">
             <thead class="h-12 bg-slate-400 text-center items-center">
-                <th class="w-fit border-r-1 border-black">Id</th>
+                <th class="w-fit border-r-1 border-black">Codigo</th>
                 <th class="w-60 border-r-1 border-black">Nombre</th>
                 <th class="w-fit border-r-1 border-black">Marca</th>
                 <th class="w-fit border-r-1 border-black">Stock</th>
@@ -13,23 +13,30 @@
                 <th class="w-fit"></th>
             </thead>
             <tbody class="text-center items-center">
-                @for (a of articulos; track a.id) {
+                @for (a of articulos; track a.codigo) {
                 <tr class="w-fit h-10 even:bg-gray-200 odd:bg-white">
-                    <td class="border-r-1 border-black">{{a.id}}</td>
+                    <td class="border-r-1 border-black">{{a.codigo}}</td>
                     <td class="border-r-1 border-black px-2">{{a.nombre}}</td>
-                    <td class="border-r-1 border-black">{{a.marca}} X</td>
+                    <td class="border-r-1 border-black">{{a.marca}}</td>
                     <td class="border-r-1 border-black">{{a.cantidad}}</td>
                     <td class="border-r-1 border-black">{{a.compra | currency: ''}}</td>
                     <td class="border-r-1 border-black">{{a.venta | currency: ''}}</td>
                     <td class="border-r-1 border-black">{{a.proveedor}}</td>
                     <td class="border-r-1 border-black">{{a.fecha}}</td>
                     <td class="h-10 flex flex-row justify-around items-center">
-                        <button class="w-fit cursor-pointer hover:underline">✎</button>
-                        <button class="w-fit cursor-pointer hover:underline">🗑</button>
+                        <button (click)="ver_articulo(a)" class="w-fit cursor-pointer hover:underline px-2">+</button>
+                        <!-- <button class="w-fit cursor-pointer hover:underline">✎</button>
+                        <button (click)="borrarArticulo(a.id)" class="w-fit cursor-pointer hover:underline">🗑</button> -->
                     </td>
                 </tr>
                 }
             </tbody>
         </table>
+        @if(mensaje) {
+        <app-info [msj]=mensaje (salida)="cerrarVentana()" />
+        }
+        @if(editar) {
+        <app-editar [articulo]=editar (cerrar)="cerrarPopup()" (salida_editar)="crearMensaje('Articulo editado')" (salida)="crearMensaje('Articulo borrado')" />
+        }
     </div>
 </div>

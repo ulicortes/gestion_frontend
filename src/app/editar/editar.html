@@ -1,0 +1,45 @@
+<div class="w-full h-full absolute top-0 bg-black/30 flex justify-center items-center">
+    <form [formGroup]="form" class="w-2/4 h-2/4 bg-white flex flex-row justify-center">
+        <div class="w-1/2 h-full flex flex-col justify-evenly">
+            <div class="w-3/4 flex flex-col justify-center text-center self-center">
+                <input required type="text" formControlName="codigo" min="0"
+                    class="border-b-2 border-black text-center">
+                <label for="">Codigo</label>
+            </div>
+            <div class="w-3/4 flex flex-col justify-center text-center self-center">
+                <input required type="text" formControlName="nombre" class="border-b-2 border-black text-center">
+                <label for="">Nombre</label>
+            </div>
+            <div class="w-3/4 flex flex-col justify-center text-center self-center">
+                <input required type="text" formControlName="marca" class="border-b-2 border-black text-center">
+                <label for="">Marca</label>
+            </div>
+            <div class="w-3/4 flex flex-col justify-center text-center self-center">
+                <input required type="number" formControlName="cantidad" min="0"
+                    class="border-b-2 border-black text-center">
+                <label for="">Cantidad</label>
+            </div>
+        </div>
+        <div class="w-1/2 h-full flex flex-col justify-evenly">
+            <div class="w-3/4 flex flex-col justify-center text-center self-center">
+                <input required type="number" formControlName="compra" min="0"
+                    class="border-b-2 border-black text-center">
+                <label for="">Compra</label>
+            </div>
+            <div class="w-3/4 flex flex-col justify-center text-center self-center">
+                <input required type="number" formControlName="venta" min="0"
+                    class="border-b-2 border-black text-center">
+                <label for="">Venta</label>
+            </div>
+            <div class="w-3/4 flex flex-col justify-center text-center self-center">
+                <input required type="text" formControlName="proveedor" class="border-b-2 border-black text-center">
+                <label for="">Proveedor</label>
+            </div>
+            <div class="w-4/4 flex flex-row justify-evenly text-center items-center">
+                <button (click)="editar(articulo?.id || 0)" class="bg-black text-white cursor-pointer px-2">Editar</button>
+                <button (click)="borrarArticulo(articulo?.id || 0)" class="bg-black text-white cursor-pointer px-2">Borrar</button>
+                <button (click)="cerrarVentana()" class="bg-black text-white cursor-pointer px-2">Volver</button>
+            </div>
+        </div>
+    </form>
+</div>

@@ -1,22 +1,60 @@
-<div class="w-screen h-screen bg-black/20 pt-8">
-    <div class="w-full h-full overflow-y-scroll flex justify-center items-start">
-        <table class="w-4/6">
-            <thead class="h-12 bg-slate-400 text-center items-center">
-                <th class="w-fit">Id</th>
-                <th class="w-fit">Fecha</th>
-                <th class="w-fit">Total</th>
-                <th class="w-fit"></th>
+<div class="w-screen h-screen max-h-screen bg-black/20 pt-8">
+    <div class="w-full h-full flex flex-row justify-center items-start">
+        <div class="w-3/4 h-full overflow-y-scroll">
+            <table class="w-full">
+                <thead class="sticky top-0 h-12 bg-slate-400 text-center items-center">
+                    <tr class="">
+                        <th class="w-fit">Id</th>
+                        <th class="w-fit">Fecha</th>
+                        <th class="w-fit">Total</th>
+                        <th class="w-fit"></th>
+                    </tr>
+                </thead>
+                <tbody class="text-center items-center">
+                    @for (c of compras; track c.id) {
+                    <tr class='bg-gray-200'>
+                        <td class="py-1">{{c.id}}</td>
+                        <td>{{c.fecha}}</td>
+                        <td>{{c.total | currency: ''}}</td>
+                        <td class="flex flex-row justify-evenly content-center">
+                            <button (click)="verDetalle(c.id, c.total, c.fecha)"
+                                class="cursor-pointer hover:underline">Detalle</button>
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @if(abierto) {
+    <div class="w-full h-full absolute top-0 flex justify-center items-center bg-black/70">
+        <table class="w-4/5">
+            <thead class="bg-slate-400 text-center items-center">
+                <tr>
+                    <th class="py-2" colspan="3">Detalle - {{fecha}}</th>
+                    <th colspan="1"><button (click)="toggleVentana()" class="cursor-pointer">X</button></th>
+                </tr>
+                <tr>
+                    <th class="text-bold">Codigo</th>
+                    <th class="text-bold">Articulo</th>
+                    <th class="text-bold">Cantidad</th>
+                    <th class="text-bold">Total</th>
+                </tr>
             </thead>
             <tbody class="text-center items-center">
-                <tr class="h-6 even:bg-gray-200 odd:bg-white">
-                    <td>1</td>
-                    <td>30-12-2025</td>
-                    <td>$130.000</td>
-                    <td class="flex flex-row justify-evenly content-center">
-                        <button class="cursor-pointer hover:underline">Detalle</button>
-                    </td>
+                @for (d of detalles; track $index) {
+                <tr class='bg-white'>
+                    <td class="py-1">{{d.codigo}}</td>
+                    <td>{{d.nombre}}</td>
+                    <td>{{d.cantidad}}</td>
+                    <td>{{d.total | currency: ''}}</td>
                 </tr>
+                }
             </tbody>
+            <tfoot>
+                <th class="bg-slate-300 py-1" colspan="4">Total: {{total | currency: ''}}</th>
+            </tfoot>
         </table>
     </div>
+    }
 </div>

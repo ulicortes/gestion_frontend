@@ -1,5 +1,6 @@
-export default class Articulo {
-    id: number = 0;
+export default class Item {
+    id: number;
+    codigo: string;
     nombre: string;
     marca: string;
     cantidad: number;
@@ -8,9 +9,10 @@ export default class Articulo {
     proveedor: string;
     fecha: string;
 
-    constructor(id: number, nombre: string, marca: string, cant: number,
+    constructor(id: number, codigo: string, nombre: string, marca: string, cant: number,
         compra: number, venta: number, prov: string, fecha: string) {
         this.id = id;
+        this.codigo = codigo;
         this.nombre = nombre;
         this.marca = marca;
         this.cantidad = cant;
@@ -20,7 +22,7 @@ export default class Articulo {
         this.fecha = fecha;
     }
 
-    public getId():number {return this.id}
+    public getCodigo():string {return this.codigo}
     public getNombre():string {return this.nombre}
     public getMarca():string {return this.marca}
     public getCantidad():number {return this.cantidad}
