@@ -19,6 +19,7 @@ export class App {
       this.router.navigate(['/'])
     }
     if (event.key === 'F7') {
+      event.preventDefault();
       this.router.navigate(['/registro'])
     }
     if (event.key === 'F8') {
