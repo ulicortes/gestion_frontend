@@ -4,19 +4,22 @@ import { HostListener } from '@angular/core';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink],
+  imports: [RouterOutlet],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })
 export class App {
   protected readonly title = signal('gestion_frontend');
 
-  constructor(private router: Router){}
+  constructor(private router: Router) { }
 
   @HostListener('document:keyup', ['$event'])
-  handleKeyboardEvent(event: KeyboardEvent) { 
-    if (event.key === 'F6') {
+  handleKeyboardEvent(event: KeyboardEvent) {
+    if (event.key === 'Home') {
       this.router.navigate(['/'])
+    }
+    if (event.key === 'F6') {
+      this.router.navigate(['/stock'])
     }
     if (event.key === 'F7') {
       event.preventDefault();
@@ -25,8 +28,11 @@ export class App {
     if (event.key === 'F8') {
       this.router.navigate(['/historial'])
     }
-    if (event.key === 'F9') {
+    if (event.key === 'Insert') {
       this.router.navigate(['/articulo'])
+    }
+    if (event.key === 'F9') {
+      this.router.navigate(['/clientes'])
     }
   }
 }

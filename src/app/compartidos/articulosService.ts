@@ -1,31 +1,33 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { from, Observable } from 'rxjs';
-import Database from '@tauri-apps/plugin-sql';
+import { BehaviorSubject, from, Observable } from 'rxjs';
 import { invoke } from '@tauri-apps/api/core';
 import Item from '../clases/item';
 import ArticuloSalida from '../clases/articuloSalida';
 import Compra from '../clases/compra';
 import Detalle from '../clases/detalle';
+import { Periodo } from '../clases/periodo';
+import { Dia } from '../clases/dia';
+import { Cliente } from '../clases/cliente';
 
 @Injectable({
   providedIn: 'root',
 })
 
 export class ArticulosService {
-  URL = "http://localhost:9871";
-  constructor(private http: HttpClient) {
-  }
+  private articulosSubject = new BehaviorSubject<Item[]>([]);
+  public articulos$ = this.articulosSubject.asObservable();
 
   getArticulos(): Observable<Item[]> {
-    // return this.http.get<Articulo[]>(this.URL);
     return from(invoke<Item[]>('get_articles'));
   }
 
+  async refrescarStock() {
+    const data = await invoke<Item[]>('get_articles');
+    this.articulosSubject.next(data); // <--- Esto "empuja" los datos a todos los suscriptores
+  }
+
   newArticulo(a: Item): Observable<any> {
-    // return this.http.post<any>(this.URL, a, {
-    //   responseType: 'json'
-    // });
     return from(invoke('new_article', {
       codigo: a.codigo,
       nombre: a.nombre,
@@ -39,10 +41,6 @@ export class ArticulosService {
   }
 
   deleteArticulo(id: number): Observable<any> {
-    //   return this.http.delete<any>(`${this.URL}/${id}`, {
-    //     responseType: 'json'
-    //   });
-    // }
     return from(invoke('delete_article', { id: id }));
   }
 
@@ -60,16 +58,48 @@ export class ArticulosService {
     }));
   }
 
-  newExit(total:number, fecha: string, articulos: ArticuloSalida[]): Observable<any> {
-    return from(invoke('new_exit', {total: total, fecha: fecha, articulos: articulos}));
+  newExit(total: number, fecha: string, articulos: ArticuloSalida[], cliente: number): Observable<any> {
+    return from(invoke('new_exit', { total: total, fecha: fecha, articulos: articulos, cliente }));
   }
 
   getVentas(): Observable<Compra[]> {
     return from(invoke<Compra[]>('get_exits'));
   }
 
+  getAllVentas(): Observable<Compra[]> {
+    return from(invoke<Compra[]>('get_all_exits'));
+  }
+
   getDetalle(id: number): Observable<Detalle[]> {
-    return from (invoke<Detalle[]>('get_detail_exit', {id: id}));
+    return from(invoke<Detalle[]>('get_detail_exit', { id: id }));
+  }
+
+  getResumen(desde: String, hasta: String): Observable<Periodo> {
+    return from(invoke<Periodo>('get_period', { desde: desde, hasta: hasta }));
+  }
+
+  getTop5MasVendidos(): Observable<Detalle[]> {
+    return from(invoke<Detalle[]>('get_top_5_exits'));
+  }
+
+  getCuentaVtasPorDia(): Observable<Dia[]> {
+    return from(invoke<Dia[]>('get_exists_per_day'));
+  }
+
+  getTop5MenosVendidos(): Observable<Detalle[]> {
+    return from(invoke<Detalle[]>('get_top_5_not_exits'));
+  }
+
+  getClientes(): Observable<any[]> {
+    return from(invoke<any[]>('get_clients'));
+  }
+
+  newCliente(c: Cliente): Observable<any> {
+    return from(invoke('new_client', {
+      nombre: c.nombre,
+      apellido: c.apellido,
+      contacto: c.contacto
+    }));
   }
 }
 

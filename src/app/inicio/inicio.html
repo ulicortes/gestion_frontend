@@ -1,0 +1,16 @@
+<nav
+    class="h-screen bg-slate-400 text-black font-bold flex flex-row justify-evenly items-center">
+    <div class="w-1/2 h-full flex flex-col justify-evenly items-center">
+        <a class="w-1/2 h-1/4 bg-slate-100 text-center content-center" routerLink="/stock">STOCK - F6</a>
+        <a class="w-1/2 h-1/4 bg-slate-100 text-center content-center" routerLink="/registro">REGISTRO - F7</a>
+        <a class="w-1/2 h-1/4 bg-slate-100 text-center content-center" routerLink="/historial">VENTAS - F8</a>
+    </div>
+    <div class="w-1/2 h-full flex flex-col justify-evenly items-center">
+        <a class="w-1/2 h-1/4 bg-slate-100 text-center content-center" routerLink="/reportes">REPORTES</a>
+        <a class="w-1/2 h-1/4 bg-slate-100 text-center content-center" routerLink="/clientes">CLIENTES - F9</a>
+        <a class="w-1/2 h-1/4 bg-slate-100 text-center content-center" routerLink="/articulo">NUEVO</a>
+    </div>
+</nav>
+<div class="absolute top-0 z-50">
+    <router-outlet />
+</div>

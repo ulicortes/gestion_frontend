@@ -1,0 +1,24 @@
+<div class="w-screen h-screen bg-slate-300 flex flex-col justify-evenly items-center">
+    <a class="bg-white text-sm text-black px-2 absolute top-0" routerLink="/">VOLVER</a>
+    <div class="w-5/6 h-3/4 overflow-y-scroll.">
+        <table class="w-full bg-white">
+            <thead class="h-12 bg-slate-900 text-white text-center items-center">
+                <th class="w-fit border-r-1 border-black">ID</th>
+                <th class="w-fit border-r-1 border-black">NOMBRE</th>
+                <th class="w-fit border-r-1 border-black">APELLIDO</th>
+                <th class="w-fit border-r-1 border-black">CONTACTO</th>
+                <th class="w-fit"></th>
+            </thead>
+            <tbody class="text-center items-center">
+                @for (c of clientes; track c.id) {
+                <tr class="w-fit h-10 border-y-1 text-sm">
+                    <td class="border-r-1. border-black">{{c.id}}</td>
+                    <td class="border-r-1. border-black">{{c.nombre}}</td>
+                    <td class="border-r-1. border-black px-2">{{c.apellido}}</td>
+                    <td class="border-r-1. border-black">{{c.contacto}}</td>
+                </tr>
+                }
+            </tbody>
+        </table>
+        </div>
+</div>

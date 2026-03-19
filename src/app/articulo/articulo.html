@@ -1,42 +1,69 @@
-<div class="w-screen h-screen bg-black/20 flex flex-col justify-center items-center">
-    <form [formGroup]="form" class="w-2/4 h-2/4 bg-white flex flex-row justify-center">
-        <div class="w-1/2 h-full flex flex-col justify-evenly">
-            <div class="w-3/4 flex flex-col justify-center text-center self-center">
+<div class="w-screen h-screen bg-slate-300 flex flex-col justify-evenly items-center">
+    <a class="bg-white text-sm text-black px-2 absolute top-0" routerLink="/">VOLVER</a>
+    <form [formGroup]="form" class="w-3/4 h-1/3 bg-white rounded-xl flex flex-col justify-center">
+        <div class="w-full text-xl font-bold py-2 flex flex-col justify-evenly text-center self-center">
+            <label for="">Nuevo articulo</label>
+        </div>
+        <div class="w-full h-1/2 flex flex-row flex-wrap justify-evenly">
+            <div class="w-1/5 flex flex-col justify-evenly text-center self-center">
                 <input required type="text" formControlName="codigo" min="0"
                     class="border-b-2 border-black text-center">
                 <label for="">Codigo</label>
             </div>
-            <div class="w-3/4 flex flex-col justify-center text-center self-center">
+            <div class="w-1/5 flex flex-col justify-center text-center self-center">
                 <input required type="text" formControlName="nombre" class="border-b-2 border-black text-center">
                 <label for="">Nombre</label>
             </div>
-            <div class="w-3/4 flex flex-col justify-center text-center self-center">
+            <div class="w-1/5 flex flex-col justify-center text-center self-center">
                 <input required type="text" formControlName="marca" class="border-b-2 border-black text-center">
                 <label for="">Marca</label>
             </div>
-            <div class="w-3/4 flex flex-col justify-center text-center self-center">
+            <div class="w-1/5 flex flex-col justify-center text-center self-center">
                 <input required type="number" formControlName="cantidad" min="0"
                     class="border-b-2 border-black text-center">
                 <label for="">Cantidad</label>
             </div>
         </div>
-        <div class="w-1/2 h-full flex flex-col justify-evenly">
-            <div class="w-3/4 flex flex-col justify-center text-center self-center">
+        <div class="w-full h-1/2 flex flex-row flex-wrap justify-evenly">
+            <div class="w-1/5 flex flex-col justify-center text-center self-center">
                 <input required type="number" formControlName="compra" min="0"
                     class="border-b-2 border-black text-center">
                 <label for="">Compra</label>
             </div>
-            <div class="w-3/4 flex flex-col justify-center text-center self-center">
+            <div class="w-1/5 flex flex-col justify-center text-center self-center">
                 <input required type="number" formControlName="venta" min="0"
                     class="border-b-2 border-black text-center">
                 <label for="">Venta</label>
             </div>
-            <div class="w-3/4 flex flex-col justify-center text-center self-center">
+            <div class="w-1/4 flex flex-col justify-center text-center self-center">
                 <input required type="text" formControlName="proveedor" class="border-b-2 border-black text-center">
                 <label for="">Proveedor</label>
             </div>
-            <div class="w-4/4 flex flex-col justify-center text-center items-center">
+            <div class="w-1/4 flex flex-col justify-center text-center items-center">
                 <button (click)="enviar()" class="bg-black text-white cursor-pointer px-10">Enviar</button>
+            </div>
+        </div>
+    </form>
+    <form [formGroup]="cliente" class="w-3/4 h-1/4 bg-white rounded-xl flex flex-col justify-center">
+        <div class="w-full text-xl font-bold py-2 flex flex-col justify-evenly text-center self-center">
+            <label for="">Nuevo cliente</label>
+        </div>
+        <div class="w-full h-1/2 flex flex-row flex-wrap justify-evenly">
+            <div class="w-1/5 flex flex-col justify-evenly text-center self-center">
+                <input required type="text" formControlName="nombre" min="0"
+                    class="border-b-2 border-black text-center">
+                <label for="">Nombre</label>
+            </div>
+            <div class="w-1/5 flex flex-col justify-center text-center self-center">
+                <input required type="text" formControlName="apellido" class="border-b-2 border-black text-center">
+                <label for="">Apellido</label>
+            </div>
+            <div class="w-1/5 flex flex-col justify-center text-center self-center">
+                <input required type="text" formControlName="contacto" class="border-b-2 border-black text-center">
+                <label for="">Contacto</label>
+            </div>
+            <div class="w-1/4 flex flex-col justify-center text-center items-center">
+                <button (click)="nuevoCliente()" class="bg-black text-white cursor-pointer px-10">Enviar</button>
             </div>
         </div>
     </form>

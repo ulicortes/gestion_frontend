@@ -1,0 +1,119 @@
+<div class="w-full h-full min-h-screen py-5 bg-slate-300 flex flex-col justify-evenly items-center overflow-x-hidden">
+    <a class="bg-white text-sm text-black px-2 absolute top-0" routerLink="/">VOLVER</a>
+    
+    <div class="w-6/6 h-1/2 flex flex-col my-2 justify-evenly items-center">
+        <div class="w-full h-fit bg-white overflow-hidden flex flex-row justify-evenly items-center">
+        </div>
+        
+        <div class="w-full h-fit bg-white overflow-hidden flex flex-row justify-evenly items-center">
+            <h1 class="font-bold">REPORTE DEL PERIODO</h1>
+            <div class="w-fit flex flex-row items-center">
+                <div class="w-fit px-2 flex flex-col items-start">
+                    <h1 class="font-bold">DESDE</h1>
+                    <input [(ngModel)]="desde" type="date" name="" id="">
+                </div>
+
+                <div class="w-fit px-2 flex flex-col items-start">
+                    <h1 class="font-bold">HASTA</h1>
+                    <input [(ngModel)]="hasta" type="date" name="" id="">
+                </div>
+                <button class="h-fit bg-slate-800 text-white px-2 rounded-xl hover:bg-black cursor-pointer"
+                    (click)="buscar()">Buscar periodo
+                </button>
+            </div>
+
+        </div>
+        <div class="w-full h-full px-2. bg-white flex flex-row justify-between overflow-hidden">
+            <div class="w-1/4 h-fit px-1 flex flex-col justify-center items-center">
+                <h1 class="w-full text-xl bg-slate-900 px-2 text-white text-center">Ingreso bruto</h1>
+                <h1 class="w-full text-xl p-2 text-center">{{periodo.ingreso/100 | currency}}</h1>
+            </div>
+
+            <div class="w-1/4 h-fit px-1 flex flex-col justify-center items-center">
+                <h1 class="w-full text-xl bg-slate-900 px-2 text-white text-center">Ganancia</h1>
+                <h1 class="w-full text-xl p-2 text-center">{{periodo.ganancia/100 | currency}}</h1>
+            </div>
+
+            <div class="w-1/4 h-fit px-1 flex flex-col justify-center items-center">
+                <h1 class="w-full text-xl bg-slate-900 px-2 text-white text-center">Operaciones</h1>
+                <h1 class="w-full text-xl p-2 text-center">{{periodo.operaciones}}</h1>
+            </div>
+
+            <div class="w-1/4 h-fit px-1 flex flex-col justify-center items-center">
+                <h1 class="w-full text-xl bg-slate-900 px-2 text-white text-center">Promedio por venta</h1>
+                <h1 class="w-full text-xl p-2 text-center">{{((periodo.ingreso/periodo.operaciones)/100 | currency)
+                    ||
+                    '$0.00'}}</h1>
+            </div>
+        </div>
+    </div>
+
+    <div class="w-3/4 h-2/6 my-8 rounded-xl overflow-hidden flex flex-col justify-center">
+        <div class="w-full bg-slate-900 text-white flex flex-row">
+            <h1 class="w-full text-xl text-center">Volumen de ventas por dia</h1>
+            <button (click)="traerVolumenVtas()" class="p-1 hover:underline cursor-pointer">Cargar</button>
+        </div>
+
+        <div class="w-full h-50 py-2 bg-white flex flex-row justify-evenly items-end">
+            @for (d of diasList; track $index) {
+            <div class="flex-1 h-full flex flex-col justify-end items-center text-xs">
+
+                <div [style.height.%]="(d.total/total)*100" class="w-1 rounded-t-xl bg-slate-900 content-end"></div>
+                {{d.dia}}
+            </div>
+            }
+        </div>
+    </div>
+
+    <table class="w-4/5 my-8 rounded-xl overflow-hidden border-collapse table-fixed">
+        <thead class="bg-slate-900 text-white text-center items-center">
+            <tr>
+                <th class="py-2. text-xl" colspan="3">Top 5 Articulos mas vendidos</th>
+                <th class="py-2. text-md" colspan="1"><button (click)="traerTop5()"
+                        class="hover:underline cursor-pointer">Cargar tabla</button></th>
+            </tr>
+            <tr>
+                <th class="w-1/6 text-bold">Codigo</th>
+                <th class="w-3/6 text-bold">Articulo</th>
+                <th class="w-1/6 text-bold">Cantidad</th>
+                <th class="w-1/6 text-bold">Total</th>
+            </tr>
+        </thead>
+        <tbody class="text-center items-center">
+            @for (d of top5; track $index) {
+            <tr class='bg-white border-t-2 border-slate-900'>
+                <td class="truncate">{{d.codigo}}</td>
+                <td class="truncate">{{d.nombre}}</td>
+                <td class="truncate">{{d.cantidad}}</td>
+                <td class="truncate">{{d.total/100 | currency: ''}}</td>
+            </tr>
+            }
+        </tbody>
+    </table>
+
+    <table class="w-4/5 my-8 rounded-xl overflow-hidden border-collapse table-fixed">
+        <thead class="bg-slate-900 text-white text-center items-center">
+            <tr>
+                <th class="py-2. text-xl" colspan="3">Top 5 Articulos menos vendidos</th>
+                <th class="py-2. text-md" colspan="1"><button (click)="traerTop5Menos()"
+                        class="hover:underline cursor-pointer">Cargar tabla</button></th>
+            </tr>
+            <tr>
+                <th class="w-1/6 text-bold">Codigo</th>
+                <th class="w-3/6 text-bold">Articulo</th>
+                <th class="w-1/6 text-bold">Cantidad</th>
+                <th class="w-1/6 text-bold">Total</th>
+            </tr>
+        </thead>
+        <tbody class="text-center items-center">
+            @for (d of top5_menos; track $index) {
+            <tr class='bg-white border-t-2 border-slate-900'>
+                <td class="truncate">{{d.codigo}}</td>
+                <td class="truncate">{{d.nombre}}</td>
+                <td class="truncate">{{d.cantidad}}</td>
+                <td class="truncate">{{d.total/100 | currency: ''}}</td>
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>

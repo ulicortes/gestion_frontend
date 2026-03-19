@@ -1,15 +1,16 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import Articulo from '../clases/item';
 import ElemSalida from '../clases/elemSalida';
-import { FormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ArticulosService } from '../compartidos/articulosService';
 import ArticuloSalida from '../clases/articuloSalida';
-import { CurrencyPipe } from '@angular/common';
+import { CurrencyPipe, DatePipe } from '@angular/common';
 import { HostListener } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-registro',
-  imports: [FormsModule, CurrencyPipe],
+  imports: [FormsModule, CurrencyPipe, ReactiveFormsModule, RouterLink],
   templateUrl: './registro.html',
   styleUrl: './registro.css',
 })
@@ -18,6 +19,7 @@ export class Registro implements OnInit {
   articulos: Articulo[];
   filtro: Articulo[];
   salida: ElemSalida[];
+  clientes: any[] = []
   total: number;
   ar: string = '';
   cod: string = '';
@@ -25,24 +27,37 @@ export class Registro implements OnInit {
   seleccion: Articulo | undefined;
   info: String;
   abierto: boolean = false;
+  cliente: FormGroup;
+  private datePipe = new DatePipe('en-US');
 
-  constructor(private arts: ArticulosService, private cdr: ChangeDetectorRef) {
+  constructor(private arts: ArticulosService, private fb: FormBuilder, private cdr: ChangeDetectorRef) {
     this.articulos = [];
     this.filtro = [];
     this.salida = [];
     this.total = 0;
     this.info = '';
+    this.cliente = this.fb.group({
+      id: ''
+    })
   }
 
   ngOnInit(): void {
-    this.arts.getArticulos().subscribe(
+    this.arts.articulos$.subscribe(
       res => {
-        this.articulos = res;
-        this.filtro = res;
+        this.articulos = res.filter(a => a.cantidad > 0);
+        this.filtro = this.articulos;
         this.info = '';
+      }
+    );
+    this.arts.refrescarStock();
+    this.arts.getClientes().subscribe({
+      next: res => {
+        this.clientes = res
         this.cdr.markForCheck();
         this.cdr.detectChanges();
-      }
+      },
+      error: e => console.log(e)
+    }
     );
   }
 
@@ -55,7 +70,7 @@ export class Registro implements OnInit {
       this.salida.push(new ElemSalida(ar.id, ar.codigo, ar.nombre, this.cantidad, ar.cantidad, ar.venta));
       this.total = 0;
       this.salida.forEach(it => {
-        this.total += parseFloat((it.getCantidad() * it.getVenta()).toFixed(2));
+        this.total += (it.getCantidad() * it.getVenta());
       });
       this.cantidad = 1;
       this.cod = '';
@@ -69,9 +84,12 @@ export class Registro implements OnInit {
       let arts_venta: ArticuloSalida[] = [];
       this.salida.forEach(s => {
         arts_venta.push(new ArticuloSalida(s.getId(), s.getCantidad(), s.getVenta()));
-      })
-      this.arts.newExit(this.total, new Date().toLocaleDateString(), arts_venta).subscribe({
+      });
+      let id_cliente = this.cliente.get('id')?.value;
+      this.arts.newExit(this.total, this.datePipe.transform(new Date(), "yyyy-MM-dd HH:mm:ss")!, arts_venta, Number(id_cliente))
+      .subscribe({        
         next: res => {
+          console.log(res);
           this.crearMensaje(res);
           this.total = 0;
           this.salida = [];
@@ -87,6 +105,7 @@ export class Registro implements OnInit {
     this.info = msg;
     this.cdr.markForCheck();
     this.cdr.detectChanges();
+    this.arts.refrescarStock();
   }
 
   borrar(elemento: ElemSalida) {
@@ -107,8 +126,8 @@ export class Registro implements OnInit {
   }
 
   cambiarCod(c: string) {
-    if(c == null) {this.filtro = this.articulos;}
-    else {this.filtro = this.articulos.filter(a => a.codigo.startsWith(c));}
+    if (c == null) { this.filtro = this.articulos; }
+    else { this.filtro = this.articulos.filter(a => a.codigo.startsWith(c)); }
   }
 
   buscarArticulo() {
@@ -116,7 +135,7 @@ export class Registro implements OnInit {
   }
 
   @HostListener('document:keyup', ['$event'])
-  handleKeyboardEvent(event: KeyboardEvent) { 
+  handleKeyboardEvent(event: KeyboardEvent) {
     console.log(event.key)
     if (event.key === 'F2') {
       this.toggleFiltro()

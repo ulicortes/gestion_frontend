@@ -1,92 +1,122 @@
-<div class="w-screen h-screen bg-black/20 flex flex-col justify-start items-center">
-    <div class="w-4/6 h-1/6 flex flex-col justify-center items-center">
-        <button (click)="toggleFiltro()" class="bg-white p-2 cursor-pointer">BUSCAR</button>
-        <h1>F2 para abir el buscador</h1>
-    </div>
+<div class="w-screen h-screen bg-slate-300 flex flex-col justify-start items-center">
+    <a routerLink="/" class="bg-white text-sm text-black px-2 mb-4">VOLVER</a>
+
+    <!-- <div class="w-4/6 h-fit flex flex-row justify-center items-center">
+        <button (click)="toggleFiltro()" class="bg-white px-6 cursor-pointer">BUSCAR</button>
+        <h1 class="px-2 text-sm">F2 para abir el buscador</h1>
+    </div> -->
+
     @if(abierto) {
-    <div class="w-6/6 h-6/6 absolute pt-16 flex justify-center items-start bg-black/70">
-        <table class="w-5/6 table-auto border-separate-1">
-            <thead class="h-3/6 bg-slate-400 text-center">
+    <div class="w-6/6 h-6/6 absolute pt-16 z-50 flex justify-center items-start bg-black/70">
+        <div class="w-5/6 h-5/6 overflow-y-scroll rounded-xl">
+            <table class="w-full table-fixed. border-separate-1">
+                <thead class="h-3/6 bg-slate-900 text-white text-center sticky top-0 z-40">
+                    <tr>
+                        <th colspan="5"></th>
+                        <th colspan="1"><button (click)="toggleFiltro()" class="cursor-pointer text-white">X</button>
+                        </th>
+                    </tr>
+                    <tr>
+                        <th>Codigo</th>
+                        <th class="max-w-[90px]">Nombre</th>
+                        <th>Stock</th>
+                        <th>Cantidad</th>
+                        <th>Precio</th>
+                        <th></th>
+                    </tr>
+                    <tr>
+                        <th class="max-w-[110px]" colspan="1"><input placeholder="Buscar por codigo" [ngModel]='cod'
+                                (ngModelChange)="cambiarCod($event)" class="w-5/6 bg-white text-center my-4"
+                                type="text" /></th>
+                        <th class="max-w-[170px]" colspan="1"><input placeholder="Buscar por articulo" [(ngModel)]="ar"
+                                (ngModelChange)="cambiarArt($event)" class="w-5/6 bg-white text-center my-2"
+                                type="text" /></th>
+                        <th colspan="4"></th>
+                    </tr>
+                </thead>
+                <tbody class="h-2/6 text-center items-center">
+                    @for (a of filtro; track $index) {
+                    <tr class="bg-white border-b-1 border-black">
+                        <td class="max-w-[110px]">{{a.codigo}}</td>
+                        <td class="max-w-[170px] truncate" title="{{ a.nombre }}">{{a.nombre}}</td>
+                        <td>{{a.cantidad}}</td>
+                        <td>
+                            <input [ngModel]=1 (ngModelChange)="newValue($event)" type="number" class="text-center"
+                                min="1" max={{a.cantidad}}>
+                        </td>
+                        <td>{{a.venta/100 | currency: ''}}</td>
+                        <td class="h-full flex flex-col justify-center items-center py-1">
+                            <button (click)="agregar(a)" class="h-full cursor-pointer hover:underline">Agregar</button>
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    }
+
+    <div class="w-full h-5/6 overflow-y-scroll">
+        <table class="table-auto mb-6 w-full h-fit text-sm">
+            <thead class="text-white sticky top-0 bg-slate-900">
                 <tr>
-                    <th colspan="5"></th>
-                    <th colspan="1"><button (click)="toggleFiltro()" class="cursor-pointer">X</button></th>
+                    <th colspan="2">
+                        <button (click)="toggleFiltro()" class="bg-white text-black px-6 cursor-pointer">BUSCAR</button>
+                        <h1 class="px-2 text-xs">F2 para abir el buscador</h1>
+                    </th>
+                    <th colspan="2" class="text-xl">NUEVA SALIDA</th>
+                    <th colspan="2" class="py-4 text-white text-center font-bold texl-xl bg-slate-900">
+                        <div class="flex flex-row justify-evenly items-center">
+                            <form [formGroup]="cliente">
+                                <select formControlName="id" class="text-black px-2 w-fit" name="" id="">
+                                    @for (c of clientes; track c.id) {
+                                    <option [value]="c.id">{{c.nombre}} {{c.apellido}}</option>
+                                    }
+                                </select>
+                            </form>
+                        </div>
+                    </th>
                 </tr>
                 <tr>
-                    <th colspan="1"><input placeholder="Buscar por codigo" [ngModel]='cod' (ngModelChange)="cambiarCod($event)"
-                            class="w-5/6 bg-white text-center my-4" type="text" /></th>
-                    <th colspan="1"><input placeholder="Buscar por articulo" [(ngModel)]="ar" (ngModelChange)="cambiarArt($event)"
-                            class="w-5/6 bg-white text-center my-2" type="text" /></th>
-                    <th colspan="4"></th>
-                </tr>
-            </thead>
-            <thead class="h-3/6 bg-slate-400 text-center">
-                <tr>
-                    <th>Codigo</th>
-                    <th>Nombre</th>
-                    <th>Stock</th>
-                    <th>Cantidad</th>
-                    <th>Precio</th>
+                    <th class="text-lg">Codigo</th>
+                    <th class="text-lg">Articulo</th>
+                    <th class="text-lg">Cantidad</th>
+                    <th class="text-lg">Precio unit.</th>
+                    <th class="text-lg">Total</th>
                     <th></th>
                 </tr>
             </thead>
-            <tbody class="h-2/6 text-center items-start">
-                @for (a of filtro; track $index) {
-                <tr class="bg-white border-b-1 border-black">
-                    <td>{{a.codigo}}</td>
-                    <td>{{a.nombre}}</td>
-                    <td>{{a.cantidad}}</td>
+            <tbody class="text-center">
+                @for (item of salida; track item.getId()) {
+                <tr class="bg-slate-200 h-fit">
+                    <td class="h-2. py-4">{{item.getCodigo()}}</td>
+                    <td>{{item.getNombre()}}</td>
+                    <td>{{item.getCantidad()}}</td>
+                    <td>{{item.getVenta()/100 | currency: ''}}</td>
+                    <td>{{(item.getVenta() * item.getCantidad())/100 | currency: ''}}</td>
                     <td>
-                        <input [ngModel]=1 (ngModelChange)="newValue($event)" type="number" class="text-center"
-                            min="1" max={{a.cantidad}}>
-                    </td>
-                    <td>{{a.venta | currency: ''}}</td>
-                    <td class="h-full flex justify-center items-center py-1">
-                        <button (click)="agregar(a)" class="self-center cursor-pointer hover:underline">Agregar</button>
+                        <button (click)="borrar(item)" class="cursor-pointer hover:underline w-fit">Borrar</button>
                     </td>
                 </tr>
                 }
             </tbody>
+            <tfoot>
+                <tr>
+
+                    <td colspan="5" class="py-4 text-white text-center font-bold texl-xl sticky. bottom-0 bg-slate-900">
+                        TOTAL: {{total/100 | currency: ''}}
+
+                    </td>
+                    <td colspan="1" class="py-4 text-white text-center font-bold texl-xl sticky. bottom-0 bg-slate-900">
+                        <button class="bg-white text-slate-900 w-fit h-fit p-1 cursor-pointer"
+                            (click)="realizarCompra()">Finalizar</button>
+                    </td>
+                </tr>
+            </tfoot>
         </table>
     </div>
-    }
-    <table class="table-auto w-full h-fit bg-slate-400 text-sm">
-        <thead class="bg-slate-500 h-1/6.">
-            <tr>
-                <th colspan="6" class="text-2xl">Salida</th>
-            </tr>
-            <tr>
-                <th class="text-lg">Codigo</th>
-                <th class="text-lg">Articulo</th>
-                <th class="text-lg">Cantidad</th>
-                <th class="text-lg">Precio unit.</th>
-                <th class="text-lg">Total</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody class="text-center items-center h-5/6">
-            @for (item of salida; track item.getId()) {
-            <tr class="bg-slate-200">
-                <td class="h-2. py-1">{{item.getCodigo()}}</td>
-                <td>{{item.getNombre()}}</td>
-                <td>{{item.getCantidad()}}</td>
-                <td>{{item.getVenta() | currency: ''}}</td>
-                <td>{{(item.getVenta() * item.getCantidad()).toFixed(2) | currency: ''}}</td>
-                <td>
-                    <button (click)="borrar(item)" class="cursor-pointer hover:underline w-fit">Borrar</button>
-                </td>
-            </tr>
-            }
-        </tbody>
-        <tfoot>
-            <td colspan="6"
-                class="py-4 text-center font-bold texl-xl">
-                TOTAL: {{total | currency: ''}}
-                <button class="bg-white w-fit h-fit p-1 cursor-pointer" (click)="realizarCompra()">Finalizar</button>
-            </td>
-        </tfoot>
-    </table>
+
     @if(info !== '') {
     <h1>{{info}}</h1>
     }
-    <!-- </div> -->
 </div>
