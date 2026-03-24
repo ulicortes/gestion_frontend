@@ -68,7 +68,7 @@
                     <th colspan="2" class="py-4 text-white text-center font-bold texl-xl bg-slate-900">
                         <div class="flex flex-row justify-evenly items-center">
                             <form [formGroup]="cliente">
-                                <select formControlName="id" class="text-black px-2 w-fit" name="" id="">
+                                <select formControlName="id" class="text-black px-2 w-fit z-30" name="" id="">
                                     @for (c of clientes; track c.id) {
                                     <option [value]="c.id">{{c.nombre}} {{c.apellido}}</option>
                                     }
@@ -102,8 +102,21 @@
             </tbody>
             <tfoot>
                 <tr>
-
-                    <td colspan="5" class="py-4 text-white text-center font-bold texl-xl sticky. bottom-0 bg-slate-900">
+                    <td colspan="1" class="py-4 text-white text-center font-bold texl-xl sticky. bottom-0 bg-slate-900">
+                        <form [formGroup]="mdp">
+                            <select formControlName="mdp" class="text-black px-2 w-fit z-30" name="" id="">
+                                <option [value]="0">CUENTA CORRIENTE</option>
+                                <option [value]="1">EFECTIVO</option>
+                                <option [value]="2">TRANFERENCIA</option>
+                                <option [value]="3">DEBITO</option>
+                                <option [value]="4">CREDITO</option>
+                                <option [value]="5">CHEQUE</option>
+                                <option [value]="6">QR</option>
+                                <option [value]="7">BILLETERA VIRTUAL</option>
+                            </select>
+                        </form>
+                    </td>
+                    <td colspan="4" class="py-4 text-white text-center font-bold texl-xl sticky. bottom-0 bg-slate-900">
                         TOTAL: {{total/100 | currency: ''}}
 
                     </td>

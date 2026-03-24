@@ -28,6 +28,7 @@ export class Registro implements OnInit {
   info: String;
   abierto: boolean = false;
   cliente: FormGroup;
+  mdp: FormGroup;
   private datePipe = new DatePipe('en-US');
 
   constructor(private arts: ArticulosService, private fb: FormBuilder, private cdr: ChangeDetectorRef) {
@@ -38,6 +39,9 @@ export class Registro implements OnInit {
     this.info = '';
     this.cliente = this.fb.group({
       id: ''
+    });
+    this.mdp = this.fb.group({
+      mdp: ''
     })
   }
 
@@ -80,25 +84,51 @@ export class Registro implements OnInit {
   }
 
   realizarCompra() {
-    if (this.total > 0) {
-      let arts_venta: ArticuloSalida[] = [];
-      this.salida.forEach(s => {
-        arts_venta.push(new ArticuloSalida(s.getId(), s.getCantidad(), s.getVenta()));
-      });
-      let id_cliente = this.cliente.get('id')?.value;
-      this.arts.newExit(this.total, this.datePipe.transform(new Date(), "yyyy-MM-dd HH:mm:ss")!, arts_venta, Number(id_cliente))
-      .subscribe({        
-        next: res => {
-          console.log(res);
-          this.crearMensaje(res);
-          this.total = 0;
-          this.salida = [];
-        },
-        error: e => this.crearMensaje(e)
-      });
-    } else {
+    let medio = this.mdp.get('mdp')?.value;
+    let id_cliente = this.cliente.get('id')?.value;
+
+    if (this.total == 0) {
       this.crearMensaje("No hay productos en el carrito.");
+      return;
     }
+    if (medio == '') {
+      this.crearMensaje("Seleccionar medio de pago");
+      return;
+    }
+    if (id_cliente == '') {
+      this.crearMensaje("Seleccionar un cliente");
+      return;
+    }
+
+    let arts_venta: ArticuloSalida[] = [];
+    this.salida.forEach(s => {
+      arts_venta.push(new ArticuloSalida(s.getId(), s.getCantidad(), s.getVenta()));
+    });
+    let pagado = (medio == 0 ? 0 : 1);
+    if (pagado == 0) {
+      this.arts.newExitCuenta(this.total, this.datePipe.transform(new Date(), "yyyy-MM-dd HH:mm:ss")!, arts_venta, Number(id_cliente), pagado, Number(medio))
+        .subscribe({
+          next: res => {
+            console.log(res);
+            this.crearMensaje(res);
+            this.total = 0;
+            this.salida = [];
+          },
+          error: e => this.crearMensaje(e)
+        });
+    } else {
+      this.arts.newExit(this.total, this.datePipe.transform(new Date(), "yyyy-MM-dd HH:mm:ss")!, arts_venta, Number(id_cliente), pagado, Number(medio))
+        .subscribe({
+          next: res => {
+            console.log(res);
+            this.crearMensaje(res);
+            this.total = 0;
+            this.salida = [];
+          },
+          error: e => this.crearMensaje(e)
+        });
+    }
+
   }
 
   crearMensaje(msg: string) {
@@ -136,9 +166,11 @@ export class Registro implements OnInit {
 
   @HostListener('document:keyup', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
-    console.log(event.key)
     if (event.key === 'F2') {
       this.toggleFiltro()
+    }
+    if (event.key === 'Escape') {
+      this.abierto = false;
     }
   }
 }

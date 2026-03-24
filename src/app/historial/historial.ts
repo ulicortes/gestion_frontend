@@ -62,11 +62,24 @@ export class Historial implements OnInit {
     this.abierto = !this.abierto;
   }
 
-  @HostListener('document:keyup', ['$event'])
-  handleKeyboardEvent(event: KeyboardEvent) {
-    if (event.key === 'Escape') {
-      this.abierto = false;
-    }
+  medio(mdp: number) {
+  switch(mdp) {
+    case 1: return 'EFECTIVO';
+    case 2: return 'TRANFERENCIA';
+    case 3: return 'DEBITO';
+    case 4: return 'CREDITO';
+    case 5: return 'CHEQUE';
+    case 6: return 'QR';
+    case 7: return 'BILLETERA VIRTUAL';
+    default: return 'CUENTA CORRIENTE';
   }
+}
+
+@HostListener('document:keyup', ['$event'])
+handleKeyboardEvent(event: KeyboardEvent) {
+  if (event.key === 'Escape') {
+    this.abierto = false;
+  }
+}
 
 }

@@ -22,7 +22,9 @@ pub struct Compra {
     id: u64,
     total: u64,
     fecha: String,
-    cliente: String
+    cliente: String,
+    pagado: u64,
+    mdp: u64
 }
 
 #[derive(Serialize, Deserialize)]
@@ -51,7 +53,8 @@ pub struct Detalle {
     codigo: String,
     nombre: String,
     cantidad: u32,
-    total: u64
+    total: u64,
+    id_art: u64
 }
 
 #[derive(Serialize, Deserialize)]
@@ -67,6 +70,17 @@ pub struct Cliente {
     nombre: String,
     apellido: String,
     contacto: String
+}
+// a.codigo, a.nombre, ac.cantidad, ac.total, c.id, c.fecha
+#[derive(Serialize, Deserialize)]
+pub struct DetalleCta {
+    codigo: String,
+    nombre: String,
+    cantidad: u32,
+    total: u64,
+    compra: u64,
+    fecha: String,
+    pagado: u64,
 }
 
 fn get_db_path() -> Result<PathBuf, String> {
@@ -116,13 +130,15 @@ fn create_database() -> Result<(), String> {
     println!("Tabla clientes inicializada.");
 
     conn.execute(
-        "CREATE TABLE IF NOT EXISTS compras (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+        "CREATE TABLE compras (
+            id	INTEGER PRIMARY KEY AUTOINCREMENT,
             total INTEGER,
             fecha TEXT,
-			cliente INTEGER,
-			FOREIGN KEY(cliente) REFERENCES clientes(id)
-        );",
+            cliente	INTEGER,
+            pagado INTEGER NOT NULL DEFAULT 0,
+            medio_de_pago INTEGER NOT NULL DEFAULT 0,
+            FOREIGN KEY(cliente) REFERENCES clientes(id)
+        )",
         [],
     ).map_err(|e| e.to_string())?;
     println!("Tabla compras inicializada.");
@@ -215,6 +231,8 @@ fn new_exit(
     fecha: String,
     articulos: Vec<ArticuloCompra>,
     cliente: u64,
+    pagado: u64,
+    mdp: u64,
 ) -> Result<String, String> {
     let db_path = get_db_path()?;
     let mut conn = Connection::open(db_path).map_err(|e| e.to_string())?;
@@ -224,8 +242,8 @@ fn new_exit(
 
     // 2. Insertamos la compra (el "encabezado")
     tx.execute(
-        "INSERT INTO compras (total, fecha, cliente) VALUES (?1, ?2, ?3)",
-        (total, fecha.clone(), cliente),
+        "INSERT INTO compras (total, fecha, cliente, pagado, medio_de_pago) VALUES (?1, ?2, ?3, ?4, ?5)",
+        (total, fecha.clone(), cliente, pagado, mdp),
     ).map_err(|e| e.to_string())?;
 
     // 3. ¡AQUÍ ESTÁ EL TRUCO!: Obtenemos el ID que se generó recién
@@ -262,6 +280,51 @@ fn new_exit(
         operaciones = operaciones + 1",
         (fecha, total, ganancia),
     ).map_err(|e| e.to_string())?;
+
+    // 5. Si todo salió bien, guardamos los cambios permanentemente
+    tx.commit().map_err(|e| e.to_string())?;
+
+    Ok("Compra creada.".to_string())
+}
+
+#[tauri::command]
+fn new_exit_account(
+    total: u64,
+    fecha: String,
+    articulos: Vec<ArticuloCompra>,
+    cliente: u64,
+    pagado: u64,
+    mdp: u64,
+) -> Result<String, String> {
+    let db_path = get_db_path()?;
+    let mut conn = Connection::open(db_path).map_err(|e| e.to_string())?;
+
+    // 1. Iniciamos una transacción
+    let tx = conn.transaction().map_err(|e| e.to_string())?;
+
+    // 2. Insertamos la compra (el "encabezado")
+    tx.execute(
+        "INSERT INTO compras (total, fecha, cliente, pagado, medio_de_pago) VALUES (?1, ?2, ?3, ?4, ?5)",
+        (total, fecha.clone(), cliente, pagado, mdp),
+    ).map_err(|e| e.to_string())?;
+
+    // 3. ¡AQUÍ ESTÁ EL TRUCO!: Obtenemos el ID que se generó recién
+    let compra_id = tx.last_insert_rowid();
+
+    // 4. Insertamos cada artículo usando ese compra_id
+    for item in articulos {
+
+        tx.execute(
+            "INSERT INTO articulos_compras (articulo_id, compra_id, cantidad, total) 
+             VALUES (?1, ?2, ?3, ?4)",
+            (item.articulo_id, compra_id, item.cantidad, item.total),
+        ).map_err(|e| e.to_string())?;
+
+        tx.execute(
+            "UPDATE articulos SET cantidad = cantidad-?1 WHERE id=?2",
+            (item.cantidad, item.articulo_id),
+        ).map_err(|e| e.to_string())?;
+    }
 
     // 5. Si todo salió bien, guardamos los cambios permanentemente
     tx.commit().map_err(|e| e.to_string())?;
@@ -333,7 +396,7 @@ fn get_exits() -> Result<Vec<Compra>, String> {
 
     // 2. Preparar sentencia
     let mut stmt = conn
-        .prepare("SELECT co.id, co.total, co.fecha, CONCAT(cl.nombre, ' ', cl.apellido)
+        .prepare("SELECT co.id, co.total, co.fecha, CONCAT(cl.nombre, ' ', cl.apellido), co.pagado, co.medio_de_pago
             FROM compras co JOIN clientes cl ON co.cliente = cl.id
             where date(co.fecha) = date('now', 'localtime')")
         .map_err(|e| e.to_string())?;
@@ -345,7 +408,9 @@ fn get_exits() -> Result<Vec<Compra>, String> {
             id: row.get(0)?,
             total: row.get(1)?,
             fecha: row.get(2)?,
-            cliente: row.get(3)?
+            cliente: row.get(3)?,
+            pagado: row.get(4)?,
+            mdp: row.get(5)?
         })
     }).map_err(|e| e.to_string())?;
 
@@ -371,7 +436,7 @@ fn get_all_exits() -> Result<Vec<Compra>, String> {
 
     // 2. Preparar sentencia
     let mut stmt = conn
-        .prepare("SELECT co.id, co.total, co.fecha, CONCAT(cl.nombre, ' ', cl.apellido)
+        .prepare("SELECT co.id, co.total, co.fecha, CONCAT(cl.nombre, ' ', cl.apellido), co.pagado, co.medio_de_pago
          FROM compras co JOIN clientes cl ON co.cliente = cl.id")
         .map_err(|e| e.to_string())?;
 
@@ -382,7 +447,9 @@ fn get_all_exits() -> Result<Vec<Compra>, String> {
             id: row.get(0)?,
             total: row.get(1)?,
             fecha: row.get(2)?,
-            cliente: row.get(3)?
+            cliente: row.get(3)?,
+            pagado: row.get(4)?,
+            mdp: row.get(5)?
         })
     }).map_err(|e| e.to_string())?;
 
@@ -408,7 +475,7 @@ fn get_detail_exit(id: u64) -> Result<Vec<Detalle>, String> {
 
     // 2. Preparar sentencia
     let mut stmt = conn
-        .prepare("SELECT a.codigo, a.nombre, ac.cantidad, ac.total FROM articulos_compras ac 
+        .prepare("SELECT a.codigo, a.nombre, ac.cantidad, ac.total, a.id FROM articulos_compras ac 
         JOIN articulos a ON ac.articulo_id=a.id
         WHERE ac.compra_id=?1")
         .map_err(|e| e.to_string())?;
@@ -421,6 +488,7 @@ fn get_detail_exit(id: u64) -> Result<Vec<Detalle>, String> {
             nombre: row.get(1)?,
             cantidad: row.get(2)?,
             total: row.get(3)?,
+            id_art: row.get(4)?
         })
     }).map_err(|e| e.to_string())?;
 
@@ -472,9 +540,9 @@ fn get_top_5_exits() -> Result<Vec<Detalle>, String> {
 
     // 2. Preparar sentencia
     let mut stmt = conn
-        .prepare("SELECT a.codigo, a.nombre, SUM(ac.cantidad) as cant, SUM(ac.total) FROM articulos_compras ac 
+        .prepare("SELECT a.codigo, a.nombre, SUM(ac.cantidad) as cant, SUM(ac.total), a.id FROM articulos_compras ac 
         JOIN articulos a ON ac.articulo_id=a.id
-        GROUP BY a.codigo, a.nombre
+        GROUP BY a.codigo, a.nombre, a.id
         ORDER BY cant DESC
         LIMIT 5")
         .map_err(|e| e.to_string())?;
@@ -487,6 +555,7 @@ fn get_top_5_exits() -> Result<Vec<Detalle>, String> {
             nombre: row.get(1)?,
             cantidad: row.get(2)?,
             total: row.get(3)?,
+            id_art: row.get(4)?
         })
     }).map_err(|e| e.to_string())?;
 
@@ -549,9 +618,9 @@ fn get_top_5_not_exits() -> Result<Vec<Detalle>, String> {
 
     // 2. Preparar sentencia
     let mut stmt = conn
-        .prepare("SELECT a.codigo, a.nombre, SUM(IFNULL(ac.cantidad, 0)) as cant, SUM(IFNULL(ac.total, 0)) FROM articulos_compras ac 
+        .prepare("SELECT a.codigo, a.nombre, SUM(IFNULL(ac.cantidad, 0)) as cant, SUM(IFNULL(ac.total, 0)), a.id FROM articulos_compras ac 
         RIGHT JOIN articulos a ON ac.articulo_id=a.id
-        GROUP BY a.codigo, a.nombre
+        GROUP BY a.codigo, a.nombre, a.id
         ORDER BY cant ASC
         LIMIT 5")
         .map_err(|e| e.to_string())?;
@@ -564,6 +633,7 @@ fn get_top_5_not_exits() -> Result<Vec<Detalle>, String> {
             nombre: row.get(1)?,
             cantidad: row.get(2)?,
             total: row.get(3)?,
+            id_art: row.get(4)?
         })
     }).map_err(|e| e.to_string())?;
 
@@ -637,6 +707,138 @@ fn new_client(
     Ok("Cliente guardado correctamente".to_string())
 }
 
+#[tauri::command]
+fn get_exits_by_client(id: u64, mdp:u64) -> Result<Vec<DetalleCta>, String> {
+    let db_path = get_db_path()?;
+    // 1. Conexión (Asegúrate de que la ruta sea correcta)
+    let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
+
+    // 2. Preparar sentencia
+    let mut stmt = conn
+        .prepare("select a.codigo, a.nombre, ac.cantidad, ac.total, c.id, c.fecha, c.pagado 
+            from articulos_compras ac
+            join compras c on ac.compra_id=c.id
+            join clientes cl on c.cliente=cl.id
+            join articulos a on ac.articulo_id=a.id
+            where cl.id=?1 and c.medio_de_pago=?2")
+        .map_err(|e| e.to_string())?;
+
+    // 3. Ejecutar query
+    let compras_iter = stmt.query_map([id, mdp], |row| {
+        // Asegúrate de que los tipos coincidan: i32, String, f64, etc.
+        Ok(DetalleCta {
+            codigo: row.get(0)?,
+            nombre: row.get(1)?,
+            cantidad: row.get(2)?,
+            total: row.get(3)?,
+            compra: row.get(4)?,
+            fecha: row.get(5)?,
+            pagado: row.get(6)?
+        })
+    }).map_err(|e| e.to_string())?;
+
+    // 4. Transformación manual (Evita el error de collect)
+    let mut lista_compras = Vec::new();
+
+    for resultado in compras_iter {
+        // resultado es un Result<Articulo, rusqlite::Error>
+        match resultado {
+            Ok(com) => lista_compras.push(com),
+            Err(e) => return Err(format!("Error leyendo fila: {}", e)),
+        }
+    }
+
+    Ok(lista_compras)
+}
+
+#[tauri::command]
+fn get_all_exits_by_client(id: u64) -> Result<Vec<Compra>, String> {
+    let db_path = get_db_path()?;
+    // 1. Conexión (Asegúrate de que la ruta sea correcta)
+    let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
+
+    // 2. Preparar sentencia
+    let mut stmt = conn
+        .prepare("SELECT co.id, co.total, co.fecha, CONCAT(cl.nombre, ' ', cl.apellido), co.pagado, co.medio_de_pago
+         FROM compras co JOIN clientes cl ON co.cliente = cl.id
+         WHERE cl.id=?1")
+        .map_err(|e| e.to_string())?;
+
+    // 3. Ejecutar query
+    let compras_iter = stmt.query_map([id], |row| {
+        // Asegúrate de que los tipos coincidan: i32, String, f64, etc.
+        Ok(Compra {
+            id: row.get(0)?,
+            total: row.get(1)?,
+            fecha: row.get(2)?,
+            cliente: row.get(3)?,
+            pagado: row.get(4)?,
+            mdp: row.get(5)?
+        })
+    }).map_err(|e| e.to_string())?;
+
+    // 4. Transformación manual (Evita el error de collect)
+    let mut lista_compras = Vec::new();
+
+    for resultado in compras_iter {
+        // resultado es un Result<Articulo, rusqlite::Error>
+        match resultado {
+            Ok(com) => lista_compras.push(com),
+            Err(e) => return Err(format!("Error leyendo fila: {}", e)),
+        }
+    }
+
+    Ok(lista_compras)
+}
+
+#[tauri::command]
+fn confirm_pay(
+    id: i64,
+    mdp: i64,
+    fecha: String,
+    total: u64,
+    articulos: Vec<ArticuloCompra>
+) -> Result<String, String> {
+    
+    let db_path = get_db_path()?;
+    // 1. Abrir conexión
+    let conn = Connection::open(db_path).map_err(|e| e.to_string())?;
+
+    // let tx = conn.transaction().map_err(|e| e.to_string())?;
+    // 2. Ejecutar el INSERT
+    // El id no lo pasamos si es INTEGER PRIMARY KEY AUTOINCREMENT en SQLite
+    conn.execute(
+        "UPDATE compras SET pagado=1, medio_de_pago=?1 WHERE id=?2",
+        (mdp, id,)
+    ).map_err(|e| e.to_string())?;
+
+    // // 3. ¡AQUÍ ESTÁ EL TRUCO!: Obtenemos el ID que se generó recién
+    // let compra_id = tx.last_insert_rowid();
+
+    let mut ganancia: u64 = 0;
+    // // 4. Insertamos cada artículo usando ese compra_id
+    for item in articulos {
+        let diferencia: u64 = conn.query_row(
+        "SELECT venta - compra FROM articulos WHERE id = ?1",
+            [item.articulo_id],
+            |row| Ok(row.get(0)?),
+        ).map_err(|e| e.to_string())?;
+
+        ganancia += diferencia * item.cantidad as u64;
+    }
+    conn.execute(
+        "INSERT INTO diario(fecha, ingreso_bruto, ganancia_bruta, operaciones) 
+        VALUES (?1, ?2, ?3, 1)
+        ON CONFLICT(fecha) DO UPDATE SET
+        ingreso_bruto = ingreso_bruto + excluded.ingreso_bruto,
+        ganancia_bruta = ganancia_bruta + excluded.ganancia_bruta,
+        operaciones = operaciones + 1",
+        (fecha, total, ganancia),
+    ).map_err(|e| e.to_string())?;
+
+    Ok("Pago confirmado".to_string())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let _ = create_database();
@@ -651,7 +853,7 @@ pub fn run() {
             }
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![new_article, delete_article, get_articles, edit_article, new_exit, get_exits, get_all_exits, get_detail_exit, get_period, get_top_5_exits, get_exists_per_day, get_top_5_not_exits, get_clients, new_client])
+        .invoke_handler(tauri::generate_handler![new_article, delete_article, get_articles, edit_article, new_exit, new_exit_account, get_exits, get_all_exits, get_detail_exit, get_period, get_top_5_exits, get_exists_per_day, get_top_5_not_exits, get_clients, new_client, get_exits_by_client, get_all_exits_by_client, confirm_pay])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

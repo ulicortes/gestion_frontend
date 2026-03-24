@@ -35,7 +35,7 @@
         <table class="w-5/6 mb-4 overflow-hidden">
             <thead class="sticky top-0 h-10 bg-slate-900 text-white text-center items-center">
                 <tr>
-                    <th colspan="4">HISTORIAL COMPLETO DE VENTAS</th>
+                    <th colspan="6">HISTORIAL COMPLETO DE VENTAS</th>
                     <th>
                         <button class="cursor-pointer hover:underline" (click)="cargar()">CARGAR</button>
 
@@ -46,6 +46,8 @@
                     <th class="w-fit">Hora</th>
                     <th class="w-fit">Cliente</th>
                     <th class="w-fit">Total</th>
+                    <th class="w-fit">Pagado</th>
+                    <th class="w-fit">Medio de pago</th>
                     <th class="w-fit">Detalle</th>
                 </tr>
             </thead>
@@ -56,6 +58,8 @@
                     <td class="py-1">{{c.fecha | date: 'HH:mm'}}</td>
                     <td class="py-1">{{c.cliente}}</td>
                     <td class="py-1">{{c.total/100 | currency: ''}}</td>
+                    <td class="py-1">{{c.pagado}}</td>
+                    <td class="py-1">{{medio(c.mdp)}}</td>
                     <td class="flex flex-row justify-evenly content-center py-1">
                         <button (click)="verDetalle(c.id, c.total, c.fecha)" class="cursor-pointer hover:underline">
                             +

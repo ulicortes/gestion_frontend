@@ -18,8 +18,13 @@ export class ArticulosService {
   private articulosSubject = new BehaviorSubject<Item[]>([]);
   public articulos$ = this.articulosSubject.asObservable();
 
+
   getArticulos(): Observable<Item[]> {
     return from(invoke<Item[]>('get_articles'));
+  }
+
+  getAllVentasDeUnCliente(id: number): Observable<Compra[]> {
+    return from(invoke<Compra[]>('get_all_exits_by_client', {id: id}));
   }
 
   async refrescarStock() {
@@ -58,8 +63,12 @@ export class ArticulosService {
     }));
   }
 
-  newExit(total: number, fecha: string, articulos: ArticuloSalida[], cliente: number): Observable<any> {
-    return from(invoke('new_exit', { total: total, fecha: fecha, articulos: articulos, cliente }));
+  newExit(total: number, fecha: string, articulos: ArticuloSalida[], cliente: number, pagado: number, mdp: number): Observable<any> {
+    return from(invoke('new_exit', { total: total, fecha: fecha, articulos: articulos, cliente: cliente, pagado: pagado, mdp: mdp }));
+  }
+
+  newExitCuenta(total: number, fecha: string, articulos: ArticuloSalida[], cliente: number, pagado: number, mdp: number): Observable<any> {
+    return from(invoke('new_exit_account', { total: total, fecha: fecha, articulos: articulos, cliente: cliente, pagado: pagado, mdp: mdp }));
   }
 
   getVentas(): Observable<Compra[]> {
@@ -69,6 +78,8 @@ export class ArticulosService {
   getAllVentas(): Observable<Compra[]> {
     return from(invoke<Compra[]>('get_all_exits'));
   }
+
+  
 
   getDetalle(id: number): Observable<Detalle[]> {
     return from(invoke<Detalle[]>('get_detail_exit', { id: id }));
@@ -100,6 +111,14 @@ export class ArticulosService {
       apellido: c.apellido,
       contacto: c.contacto
     }));
+  }
+
+  getComprasPorCliente(id: number, mdp: number): Observable<any> {
+    return from(invoke<any[]>('get_exits_by_client', {id: id, mdp: mdp}))
+  }
+
+  confirmPago(id: number, mdp: number, fecha: string, total: number, articulos: ArticuloSalida[]): Observable<any> {
+    return from(invoke<any[]>('confirm_pay', {id: id, mdp: mdp, fecha: fecha, total: total, articulos: articulos}))
   }
 }
 

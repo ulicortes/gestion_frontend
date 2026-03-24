@@ -1,24 +1,135 @@
-<div class="w-screen h-screen bg-slate-300 flex flex-col justify-evenly items-center">
+<div class="w-screen h-full min-h-screen bg-slate-300 flex flex-col justify-center items-center">
     <a class="bg-white text-sm text-black px-2 absolute top-0" routerLink="/">VOLVER</a>
-    <div class="w-5/6 h-3/4 overflow-y-scroll.">
-        <table class="w-full bg-white">
-            <thead class="h-12 bg-slate-900 text-white text-center items-center">
-                <th class="w-fit border-r-1 border-black">ID</th>
-                <th class="w-fit border-r-1 border-black">NOMBRE</th>
-                <th class="w-fit border-r-1 border-black">APELLIDO</th>
-                <th class="w-fit border-r-1 border-black">CONTACTO</th>
-                <th class="w-fit"></th>
-            </thead>
-            <tbody class="text-center items-center">
-                @for (c of clientes; track c.id) {
-                <tr class="w-fit h-10 border-y-1 text-sm">
-                    <td class="border-r-1. border-black">{{c.id}}</td>
-                    <td class="border-r-1. border-black">{{c.nombre}}</td>
-                    <td class="border-r-1. border-black px-2">{{c.apellido}}</td>
-                    <td class="border-r-1. border-black">{{c.contacto}}</td>
-                </tr>
-                }
-            </tbody>
-        </table>
+    <div class="w-full h-3/4 flex flex-row justify-evenly">
+        <div class="w-2/6 h-150 bg-white overflow-y-scroll">
+            <table class="w-full bg-white">
+                <thead class="h-12 bg-slate-900 text-white text-center items-center sticky top-0">
+                    <tr>
+                        <th class="w-fit">CLIENTE</th>
+                        <th class="w-fit">CONTACTO</th>
+                        <th class="w-fit">CTA</th>
+                    </tr>
+                </thead>
+                <tbody class="text-center items-center">
+                    <tr>
+                        <td class="py-1 max-w-[70px]. w-[90px] whitespace-normal.">
+                            <input type="text" [(ngModel)]="nombreBusqueda" placeholder="BUSCAR"
+                                class="bg-white text-black text-center border-1.">
+                        </td>
+                        <td><button class="w-full h-full cursor-pointer" (click)="filtrarPorNombre()">BUSCAR</button>
+                        </td>
+                        <td></td>
+                    </tr>
+                    @for (c of filtro; track c.id) {
+                    <tr class="w-fit h-10 border-y-1 text-sm">
+                        <td class="max-w-[100px]">{{c.nombre}} {{c.apellido}}</td>
+                        <td class="border-r-1. border-black">{{c.contacto}}</td>
+                        <td class="cursor-pointer px-2" (click)="abrirCuenta(c.id, c.nombre, c.apellido)">»</td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
         </div>
+
+        <!-- a.codigo, a.nombre, ac.cantidad, ac.total, c.id, c.fecha  -->
+        <div class="w-3/5 h-150 bg-white overflow-y-scroll">
+            <table class="w-full h-1/4 bg-white">
+                <thead class="h-12 bg-slate-900 text-white text-center items-center sticky top-0">
+                    <tr>
+                        <th colspan="7">CUENTA CORRIENTE</th>
+                    </tr>
+                    <tr>
+                        <th colspan="7">{{cliente}}</th>
+                    </tr>
+                    <tr>
+                        <th class="w-fit">FECHA</th>
+                        <th class="w-fit">PAGADO</th>
+                        <th class="w-fit">MEDIO DE PAGO</th>
+                        <th class="w-fit">TOTAL</th>
+                        <th class="w-fit">SALDO</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody class="text-center items-center">
+                    @for (c of comprasDeCliente; track c.id) {
+                    <tr class="w-fit h-10 border-y-1 text-sm">
+                        <td>{{c.fecha | date: 'dd/MM/yyyy'}}</td>
+                        <td>{{c.pagado == 0 ? 'No': 'Si'}}</td>
+                        <td>{{medio(c.mdp)}}</td>
+                        <td>{{c.total/100 | currency: ''}}</td>
+                        <td>{{c.saldo/100 | currency: ''}}</td>
+                        @if (c.pagado == 0) {
+                        <td>
+                            <button (click)="verDetalle(c.id, c.total, c.fecha)"
+                                class="w-full h-full px-3 cursor-pointer">+</button>
+                        </td>
+                        } @else {
+                        <td></td>
+                        }
+
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if(abierto) {
+        <div class="w-full h-full fixed top-0 flex justify-center items-center bg-black/70">
+            <table class="w-4/5">
+                <thead class="bg-slate-900 text-white text-center items-center">
+                    <tr>
+                        <th class="py-2" colspan="3">Detalle - {{fecha | date: 'dd/MM/yyyy'}}</th>
+                        <th colspan="1"><button (click)="toggleVentana()" class="cursor-pointer">X</button></th>
+                    </tr>
+                    <tr>
+                        <th class="text-bold">Codigo</th>
+                        <th class="text-bold">Articulo</th>
+                        <th class="text-bold">Cantidad</th>
+                        <th class="text-bold">Total</th>
+                    </tr>
+                </thead>
+                <tbody class="text-center items-center">
+                    @for (d of detalles; track $index) {
+                    <tr class='bg-white'>
+                        <td class="py-1">{{d.codigo}}</td>
+                        <td>{{d.nombre}}</td>
+                        <td>{{d.cantidad}}</td>
+                        <td>{{d.total/100 | currency: ''}}</td>
+                    </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th class="bg-slate-300 py-1" colspan="4">Total: {{total/100 | currency: ''}}</th>
+                    </tr>
+                    @if (mensaje == '') {
+                    <tr>
+                        <th colspan="2" class="bg-slate-300 py-1">
+                            <form [formGroup]="mdp">
+                                <select formControlName="mdp" class="text-black px-2 w-fit z-30" name="" id="">
+                                    <option [value]="1">EFECTIVO</option>
+                                    <option [value]="2">TRANFERENCIA</option>
+                                    <option [value]="3">DEBITO</option>
+                                    <option [value]="4">CREDITO</option>
+                                    <option [value]="5">CHEQUE</option>
+                                    <option [value]="6">QR</option>
+                                    <option [value]="7">BILLETERA VIRTUAL</option>
+                                </select>
+                            </form>
+                        </th>
+                        <th colspan="2" class="bg-slate-300 py-1"><button class="cursor-pointer"
+                                (click)="confirmarPago()">CONFIRMAR PAGO</button></th>
+                    </tr>
+
+                    } @else {
+                    <tr>
+                        <th class="bg-slate-300 py-1" colspan="4">{{mensaje}}</th>
+                    </tr>
+                    }
+
+                </tfoot>
+            </table>
+        </div>
+        }
+    </div>
 </div>
